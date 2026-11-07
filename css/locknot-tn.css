@@ -323,8 +323,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
   .lk-subnav { display: none; }
   .lk-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: min(86vh, 820px); }
   .lk-hero-foto { order: 2; }
-  .lk-hero-foto img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; object-position: center 30%; }
-  .lk-hero-zoom { right: 28px; top: 28px; width: 220px; }
+  .lk-hero-foto img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; object-position: 72% 25%; } /* 7/11: en la compu va la versión ancha (foto 21), con el nene entero */
+  .lk-hero-zoom { left: 5%; right: auto; top: auto; bottom: 32px; width: 180px; }
   .lk-hero-foto::after { inset: 0 auto 0 0; width: 26%; height: auto; background: linear-gradient(to right, var(--lk-verde), rgba(11, 43, 33, 0)); }
   .lk-hero-texto { align-content: center; gap: 24px; margin: 0; padding: 56px 0 56px var(--lk-margen); z-index: 1; }
   .lk-hero-titulo { font-size: clamp(120px, 13.5vw, 196px); margin-right: -90px; }
