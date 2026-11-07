@@ -31,12 +31,12 @@
   /* Los de la lista de la proveedora que van con logo blanco. El naranja es a pedido: mínimo 200 pares por color, falta confirmarlo. */
   var COLORES = [
     { id: "naranja", nombre: "Naranja", hex: "#FF6B1A" },
-    { id: "negra", nombre: "Negra", hex: "#121216" },
+    { id: "negra", nombre: "Negro", hex: "#121216" },   // 7/11: el nombre como en Tienda Nube; el id arma el nombre de las fotos
     { id: "azul", nombre: "Azul", hex: "#1228AA" },
     { id: "verde", nombre: "Verde", hex: "#18703A" },
     { id: "fucsia", nombre: "Fucsia", hex: "#F0288C" },
     { id: "celeste", nombre: "Celeste", hex: "#1996F0" },
-    { id: "roja", nombre: "Roja", hex: "#CD2D23" }
+    { id: "roja", nombre: "Rojo", hex: "#CD2D23" }
   ];
   var BOTINES = [
     { id: "negro", nombre: "Negro" },
@@ -104,7 +104,7 @@
       if (ev.target.name === grupo + "-botin") botin = ev.target.value;
       if (ev.target.name === grupo + "-banda") { banda = ev.target.value; nombre.textContent = color(banda).nombre; }
       ponerFoto(img, foto(botin, banda));
-      img.alt = "Botín " + botin + " con la banda LOCKNOT " + color(banda).nombre.toLowerCase();
+      img.alt = "Botín " + botin + " con la banda LOCKNOT color " + color(banda).nombre.toLowerCase();
       precargar();
     });
   });
@@ -197,11 +197,15 @@
   /* ---------- Comprar: cada par al carrito nativo, con su talle y su color ----------
      Agrupa los pares iguales y los agrega de a un grupo con LS.addToCartEnhanced (lo mismo que el botón de Ipanema),
      eligiendo antes la variante en los <select> nativos. Al terminar, lleva al carrito. */
+  /* 7/11: en el panel los colores son "Negro" y "Rojo" (como los sugiere Tienda Nube); se aceptan también "Negra" y "Roja",
+     por si alguien cambia el nombre de la variante */
+  var MISMO_COLOR = { negra: "negro", roja: "rojo" };
+  function normal(t) { var s = String(t).trim().toLowerCase(); return MISMO_COLOR[s] || s; }
   function elegirOpcion(select, texto) {
-    var buscado = String(texto).trim().toLowerCase();
+    var buscado = normal(texto);
     for (var i = 0; i < select.options.length; i++) {
       var o = select.options[i];
-      if (o.text.trim().toLowerCase() === buscado || String(o.value).trim().toLowerCase() === buscado) { select.value = o.value; return true; }
+      if (normal(o.text) === buscado || normal(o.value) === buscado) { select.value = o.value; return true; }
     }
     return false;
   }
