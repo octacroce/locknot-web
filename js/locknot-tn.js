@@ -455,4 +455,23 @@
     window.addEventListener("resize", pintarFija);
     pintarFija();
   }
+  /* ---------- Videos cortos (7/11): mudos y en loop; se bajan recién cuando aparecen en pantalla y se pausan al salir.
+     Con "reducir movimiento" quedan quietos, en el póster. ---------- */
+  var videos = document.querySelectorAll("video[data-src]");
+  if (videos.length && "IntersectionObserver" in window &&
+      !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+    var verVideo = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) {
+          if (!v.getAttribute("src")) v.setAttribute("src", v.getAttribute("data-src"));
+          var jugar = v.play();
+          if (jugar && jugar.catch) jugar.catch(function () {});
+        } else if (!v.paused) {
+          v.pause();
+        }
+      });
+    }, { threshold: 0.35 });
+    videos.forEach(function (v) { verVideo.observe(v); });
+  }
 })();
