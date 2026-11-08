@@ -330,6 +330,9 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .js-notification-cookie-private .notification-accept-btn { margin: 0 0 0 10px !important; padding: 0 !important; min-height: 0 !important;
   font: 600 13px/1.3 var(--lk-texto) !important; color: var(--lk-naranja) !important; text-decoration: underline !important; }
 body:has(.lk-fija.lk-ver) .js-notification-cookie-private.notification-fixed-bottom { bottom: 96px !important; }
+/* botón flotante de WhatsApp de Tienda Nube: sube cuando aparece la barra de compra, así no tapa "Lo quiero" (como en Axily) */
+.btn-whatsapp { transition: bottom .4s var(--lk-suave); }
+body:has(.lk-fija.lk-ver) .btn-whatsapp { bottom: 96px !important; }
 html.lk-cookies-espera .js-notification-cookie-private.notification-fixed-bottom { opacity: 0 !important; visibility: hidden !important; }
 
 /* ---------- aparece al llegar ---------- */
