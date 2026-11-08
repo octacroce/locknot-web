@@ -308,6 +308,30 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-fija-precio small { font-size: 12px; color: var(--lk-claro); }
 .lk-fija .lk-btn { min-height: 48px; padding-inline: 20px; font-size: 16px; }
 
+/* ---------- tienda: barra de anuncios y aviso de cookies del tema (8/11, igual que en Axily) ----------
+   En el celu la barra naranja de Ipanema dejaba el tercer mensaje afuera de la pantalla: pasa a dos renglones centrados.
+   El aviso de cookies tapaba la primera pantalla: queda como una pastilla chica abajo a la izquierda (a la derecha está el
+   botón de WhatsApp), que aparece recién al bajar y se esconde mientras se ve el botón de compra (locknot.js).
+   En la vista previa no hay nada con estas clases */
+@media (max-width: 767px) {
+  .navigation-bar-list:has(.navigation-bar-group-nav-icon-text-group) { overflow-x: visible; white-space: normal; }
+  .navigation-bar-group-nav-icon-text-group { flex: 1 1 100%; min-width: 0; }
+  .navigation-bar-group-nav-icon-text-group .navigation-bar-block { flex-wrap: wrap; justify-content: center; gap: 4px 18px !important; width: 100%; }
+  .navigation-bar-group-nav-icon-text-group .navigation-bar-item { white-space: nowrap; }
+}
+.js-notification-cookie-private.notification-fixed-bottom {
+  left: 12px !important; right: auto !important; bottom: 14px !important; width: auto !important; max-width: calc(100% - 100px) !important;
+  margin: 0 !important; padding: 8px 14px !important; border-radius: 0 !important; border: 0 !important;
+  background: var(--lk-verde) !important; color: var(--lk-crema) !important; box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .5) !important;
+  font: 500 13px/1.3 var(--lk-texto) !important; text-align: left !important; white-space: nowrap;
+  transition: bottom .4s var(--lk-suave), opacity .3s var(--lk-suave), visibility .3s; }
+.js-notification-cookie-private .notification-message { font-size: 0 !important; }
+.js-notification-cookie-private .notification-message::before { content: "Usamos cookies."; font-size: 13px; }
+.js-notification-cookie-private .notification-accept-btn { margin: 0 0 0 10px !important; padding: 0 !important; min-height: 0 !important;
+  font: 600 13px/1.3 var(--lk-texto) !important; color: var(--lk-naranja) !important; text-decoration: underline !important; }
+body:has(.lk-fija.lk-ver) .js-notification-cookie-private.notification-fixed-bottom { bottom: 96px !important; }
+html.lk-cookies-espera .js-notification-cookie-private.notification-fixed-bottom { opacity: 0 !important; visibility: hidden !important; }
+
 /* ---------- aparece al llegar ---------- */
 .lk-js .lk-rev { opacity: 0; transform: translateY(18px); transition: opacity .7s var(--lk-suave), transform .7s var(--lk-suave); }
 .lk-js .lk-rev.lk-ver { opacity: 1; transform: none; }

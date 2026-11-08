@@ -475,4 +475,17 @@
     }, { threshold: 0.35 });
     videos.forEach(function (v) { verVideo.observe(v); });
   }
+  /* ---------- Aviso de cookies del tema (8/11, igual que en Axily): se ve recién cuando la persona baja y se esconde
+     mientras el botón principal de compra está en pantalla ---------- */
+  var raizCookies = document.documentElement, rafCookies = null;
+  var botonPrincipal = document.querySelector("#comprar [data-lk-comprar]") || document.querySelector(".lk-hero .lk-btn");
+  var chequearCookies = function () {
+    rafCookies = null;
+    var r = botonPrincipal && botonPrincipal.getBoundingClientRect();
+    var tapaCompra = !!r && r.top < window.innerHeight && r.bottom > 0;
+    raizCookies.classList.toggle("lk-cookies-espera", window.scrollY < window.innerHeight * 0.5 || tapaCompra);
+  };
+  window.addEventListener("scroll", function () { if (!rafCookies) rafCookies = window.requestAnimationFrame(chequearCookies); }, { passive: true });
+  window.addEventListener("resize", chequearCookies);
+  chequearCookies();
 })();
