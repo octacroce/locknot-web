@@ -52,6 +52,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-btn-linea:hover { background: var(--lk-blanco); color: var(--lk-verde); }
 
 /* ---------- línea de cancha y aros ---------- */
+/* 8/11: los íconos van acá y no en "arriba" (que no se sube a la tienda): sin esto Tienda Nube los dibujaba rellenos de negro */
+.lk-icono { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .lk-linea { height: 18px; background: url(../img/linea.png) center / 1800px 18px repeat-x; }
 .lk-aros { fill: none; stroke: var(--lk-naranja); stroke-width: 26; }
 

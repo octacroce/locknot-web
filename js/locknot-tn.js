@@ -396,8 +396,9 @@
   });
 
   /* ---------- Qué talle le va ---------- */
-  /* Números argentinos, sacados de la tabla del proveedor (5/11). A confirmar con las muestras. Debajo de "desde" no se promete nada: falta probar en botines tan chicos. */
-  var TALLES = { desde: 26, chicoHasta: 30, hasta: 43 };
+  /* Números argentinos (8/11, usuario: "al 24, 25 ponelo talle chiquito y para más grande talle grande, completá todos"):
+     hasta el 30, chico; del 31 en adelante, grande. */
+  var TALLES = { desde: 18, chicoHasta: 30, hasta: 46 };
   var numeros = document.getElementById("lk-numeros");
   var resultado = document.getElementById("lk-resultado");
   if (numeros && resultado) {
@@ -405,7 +406,7 @@
     var detalle = resultado.querySelector("p");
     var elegir = resultado.querySelector("button");
     var talleElegido = null;
-    for (var n = 24; n <= 46; n++) {
+    for (var n = TALLES.desde; n <= TALLES.hasta; n++) {
       var b = document.createElement("button");
       b.type = "button";
       b.textContent = n;
