@@ -413,7 +413,7 @@ html.lk-cookies-espera .js-notification-cookie-private.notification-fixed-bottom
   .lk-atan-sec .lk-atan { max-width: calc(1200px + 2 * var(--lk-margen)); margin: 0 auto; padding: 0 var(--lk-margen); }
   .lk-atan.lk-atan-en-sec { max-width: 1200px; margin: 64px auto 0; padding: 0; }
   .lk-atan .lk-combo figcaption { font-size: 14px; }
-  .lk-miniaturas { grid-template-columns: repeat(6, minmax(0, 92px)); }
+  .lk-miniaturas { grid-template-columns: repeat(7, minmax(0, 92px)); } /* 9/11: 7 fotos (sumó la de hockey) */
   .lk-miniaturas img.lk-foto-arriba { object-position: center 30%; }
   .lk-cierre-abajo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 720px; }
   .lk-cierre-abajo img { position: absolute; inset: 0 0 0 auto; width: 50%; height: 100%; aspect-ratio: auto; }
