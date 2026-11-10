@@ -17,10 +17,10 @@
     return isFinite(n) && n > 0 ? n : 0;
   }
 
-  /* ---------- PRECIOS (cerrados el 7/11): se cambian solo acá y en las promos de Tienda Nube ----------
-     1 par $29.900 · 2do par al 50% (2 pares, 25% OFF en Tienda Nube) con envío gratis
+  /* ---------- PRECIOS (subidos el 10/11, opción B del usuario): se cambian solo acá y en las promos de Tienda Nube ----------
+     1 par $34.900 · 2do par al 50% (2 pares, 25% OFF en Tienda Nube) con envío gratis
      Equipo: desde 5 pares, 40% OFF en cada par, con envío gratis y 3 cuotas sin interés */
-  var PRECIO_PAR = CONF.precio || 29900;
+  var PRECIO_PAR = CONF.precio || 34900;
   var precioFicha = variantes[0] ? numero(variantes[0].price_number) : 0;
   if (precioFicha && precioFicha > PRECIO_PAR / 3 && precioFicha < PRECIO_PAR * 3) PRECIO_PAR = precioFicha;
   var PACKS = { 1: PRECIO_PAR, 2: Math.round(PRECIO_PAR * 2 * 0.75) };   // 2 pares: 25% OFF en Tienda Nube (2do al 50%)
