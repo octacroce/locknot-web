@@ -149,9 +149,10 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-manifiesto .lk-aros { position: absolute; top: -30px; right: -46px; width: 170px; stroke: var(--lk-verde); opacity: .1; }
 .lk-manifiesto-texto { position: relative; display: grid; gap: 22px; max-width: 880px; }
 
-/* ---------- armá el equipo (11/11) ----------
-   Fran: "poco intuitivo tener que hacer click sobre el jugador". Una fila por color con dos contadores (chico y grande).
-   La cancha es un dibujo que se pinta con lo elegido: solo en la compu, al costado. */
+/* ---------- armá el equipo (11/11, versión 2) ----------
+   Usuario: primero cuántos son (5, 7, 9, 11 u otro con − n +), después una fila por jugador con dos desplegables
+   nativos (color y talle). WhatsApp y "Copiar el link de este equipo" abajo. La cancha es un dibujo, solo en la compu. */
+.lk-oculto { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .lk-equipo-cabeza { display: grid; gap: 12px; margin-bottom: 28px; }
 .lk-pizarra { display: grid; gap: 20px; }
 .lk-cancha { display: none; position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: repeating-linear-gradient(to bottom, #164A33 0 12.5%, #113D2A 12.5% 25%); }
@@ -159,30 +160,36 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-jugadores { position: absolute; inset: 0; }
 .lk-jugador { position: absolute; display: grid; place-items: center; width: 46px; height: 46px; margin: -23px 0 0 -23px; padding-top: .14em; border-radius: 50%; border: 9px solid var(--c); background: var(--lk-verde); box-shadow: 0 0 0 2px rgba(255, 255, 255, .9); color: var(--lk-blanco); font: 900 14px/1 var(--lk-titulos); }
 .lk-cancha-mas { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-size: 14px; font-weight: 600; }
-.lk-armador { display: grid; gap: 14px; min-width: 0; }
-.lk-armador-estado { padding: 12px 14px; background: var(--lk-verde-2); font-size: 16px; line-height: 1.35; }
-.lk-armador-estado b { color: var(--lk-naranja); font-weight: 600; }
-.lk-armador-lista { display: grid; }
-.lk-armador-cab, .lk-armador-fila { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; }
-.lk-armador-cab { padding-bottom: 6px; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lk-claro); }
-.lk-armador-cab span:not(:first-child) { width: 128px; text-align: center; }
-.lk-armador-fila { padding: 6px 0; border-top: 1px solid var(--lk-hilo-claro); }
-.lk-armador-color { display: flex; align-items: center; gap: 9px; min-width: 0; font-size: 15px; font-weight: 500; }
-.lk-armador-color i { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px rgba(255, 255, 255, .55); }
-.lk-cont { display: grid; grid-template-columns: 44px 40px 44px; align-items: center; width: 128px; border: 1px solid var(--lk-hilo-claro); }
-.lk-cont button { display: grid; place-items: center; height: 44px; font: 600 22px/1 var(--lk-texto); color: var(--lk-blanco); transition: background-color .2s var(--lk-suave); }
+.lk-armador { display: grid; gap: 26px; min-width: 0; }
+.lk-armador-paso { display: grid; gap: 14px; min-width: 0; }
+.lk-armador-titulo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; }
+.lk-armador-titulo span { display: grid; place-items: center; flex-shrink: 0; width: 30px; height: 30px; padding-top: .14em; border-radius: 50%; background: var(--lk-naranja); color: var(--lk-verde); font: 900 15px/1 var(--lk-titulos); }
+.lk-cuantos { display: flex; flex-wrap: wrap; gap: 10px; }
+.lk-cuantos-botones { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; flex: 1 1 220px; }
+.lk-cuantos-botones button { min-height: 52px; border: 1px solid var(--lk-hilo-claro); color: var(--lk-blanco); font: 900 22px/1 var(--lk-titulos); padding-top: .14em; transition: background-color .2s var(--lk-suave), border-color .2s var(--lk-suave); }
+.lk-cuantos-botones button:hover { border-color: var(--lk-claro); }
+.lk-cuantos-botones button[aria-pressed="true"] { background: var(--lk-naranja); border-color: var(--lk-naranja); color: var(--lk-verde); }
+.lk-cuantos-otro { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--lk-claro); }
+.lk-cont { display: grid; grid-template-columns: 48px 44px 48px; align-items: center; border: 1px solid var(--lk-hilo-claro); }
+.lk-cont button { display: grid; place-items: center; height: 50px; font: 600 22px/1 var(--lk-texto); color: var(--lk-blanco); transition: background-color .2s var(--lk-suave); }
 .lk-cont button:hover:not(:disabled) { background: var(--lk-verde-2); }
 .lk-cont button:disabled { opacity: .3; cursor: default; }
-.lk-cont output { text-align: center; font: 900 20px/1 var(--lk-titulos); padding-top: .15em; color: var(--lk-claro); }
-.lk-cont-con { border-color: var(--lk-naranja); }
-.lk-cont-con output { color: var(--lk-naranja); }
-@media (max-width: 359px) {
-  .lk-cont, .lk-armador-cab span:not(:first-child) { width: 112px; }
-  .lk-cont { grid-template-columns: 40px 32px 40px; }
-  .lk-cont button { height: 42px; }
-  .lk-armador-color { font-size: 14px; gap: 6px; }
-}
-.lk-resumen { display: grid; gap: 10px; margin-top: 4px; padding-top: 16px; border-top: 1px solid var(--lk-hilo-claro); }
+.lk-cont output { text-align: center; font: 900 20px/1 var(--lk-titulos); padding-top: .15em; color: var(--lk-naranja); }
+.lk-armador-estado { padding: 12px 14px; background: var(--lk-verde-2); font-size: 16px; line-height: 1.35; }
+.lk-armador-estado b { color: var(--lk-naranja); font-weight: 600; }
+.lk-atajos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.lk-atajo-mezclar { grid-column: 1 / -1; min-height: 46px; border: 1px solid var(--lk-hilo-claro); color: var(--lk-blanco); font: 600 15px/1.2 var(--lk-texto); transition: border-color .2s var(--lk-suave); }
+.lk-atajo-mezclar:hover { border-color: var(--lk-claro); }
+.lk-armador-ayuda { font-size: 14px; color: var(--lk-claro); }
+.lk-select { position: relative; display: block; min-width: 0; }
+.lk-select::after { content: ""; position: absolute; right: 14px; top: 50%; width: 8px; height: 8px; margin-top: -6px; border-right: 2px solid var(--lk-claro); border-bottom: 2px solid var(--lk-claro); transform: rotate(45deg); pointer-events: none; }
+.lk-select select { -webkit-appearance: none; appearance: none; width: 100%; min-height: 48px; padding: 0 34px 0 12px; border: 1px solid var(--lk-hilo-claro); border-radius: 0; background: transparent; color: var(--lk-blanco); font: 500 16px/1.2 var(--lk-texto); cursor: pointer; }
+.lk-select select:hover { border-color: var(--lk-claro); }
+.lk-select option { background: var(--lk-verde); color: var(--lk-blanco); }
+.lk-armador-lista { display: grid; margin: 0; padding: 0; list-style: none; }
+.lk-jug-fila { display: grid; grid-template-columns: 36px minmax(0, 1.25fr) minmax(0, 1fr); align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--lk-hilo-claro); }
+.lk-jug-num { display: grid; place-items: center; width: 36px; height: 36px; padding-top: .14em; border-radius: 50%; border: 6px solid var(--c); background: var(--lk-verde); box-shadow: 0 0 0 1px rgba(255, 255, 255, .7); font: 900 13px/1 var(--lk-titulos); }
+.lk-resumen { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--lk-hilo-claro); }
 .lk-chips { display: flex; flex-wrap: wrap; gap: 5px 14px; font-size: 15px; }
 .lk-chip { display: inline-flex; align-items: center; gap: 6px; }
 .lk-chip i { width: 13px; height: 13px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px rgba(255, 255, 255, .55); }
@@ -191,6 +198,24 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-equipo-total b { font: 900 clamp(38px, 10vw, 52px)/1 var(--lk-titulos); padding-top: .13em; }
 .lk-equipo-total b:empty { display: none; }
 .lk-btn-apagado, .lk-btn-apagado:hover { background: var(--lk-verde-2); color: var(--lk-claro); transform: none; cursor: default; }
+.lk-equipo-extra { display: grid; gap: 10px; margin-top: 6px; }
+.lk-equipo-wa { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 10px 14px; background: var(--lk-verde-2); color: var(--lk-blanco); font-size: 15px; line-height: 1.35; text-decoration: none; transition: background-color .2s var(--lk-suave); }
+.lk-equipo-wa:hover { background: #1A4A3A; }
+.lk-equipo-wa .lk-icono { color: #25D366; }
+.lk-equipo-wa b { font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.lk-equipo-link-btn { justify-self: start; min-height: 44px; padding: 0 2px; color: var(--lk-claro); font: 500 15px/1.2 var(--lk-texto); text-decoration: underline; text-underline-offset: 3px; }
+.lk-equipo-link-btn:hover { color: var(--lk-blanco); }
+.lk-equipo-link-ok { font-size: 14px; color: var(--lk-naranja); }
+.lk-equipo-link-ok:empty { display: none; }
+.lk-equipo-link-campo { width: 100%; min-height: 44px; padding: 0 10px; border: 1px solid var(--lk-hilo-claro); background: transparent; color: var(--lk-blanco); font: 400 14px/1.2 var(--lk-texto); }
+@media (max-width: 359px) {
+  .lk-cuantos-botones button { min-height: 48px; font-size: 20px; }
+  .lk-cont { grid-template-columns: 44px 40px 44px; }
+  .lk-jug-fila { grid-template-columns: 32px minmax(0, 1.2fr) minmax(0, 1fr); gap: 6px; }
+  .lk-jug-num { width: 32px; height: 32px; border-width: 5px; }
+  .lk-select select { padding-right: 28px; font-size: 15px; }
+  .lk-select::after { right: 11px; }
+}
 
 /* ---------- combinaciones ---------- */
 .lk-combos-sec { padding-bottom: var(--lk-seccion); }
@@ -395,6 +420,8 @@ html.lk-cookies-espera .js-notification-cookie-private.notification-fixed-bottom
   .lk-asi-datos .lk-asi-cabeza { grid-column: 1 / -1; }
   .lk-pizarra { grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 56px; align-items: start; }
   .lk-cancha { display: block; position: sticky; top: 92px; }
+  .lk-atajos { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; }
+  .lk-atajo-mezclar { grid-column: auto; padding: 0 18px; }
   .lk-jugador { width: 54px; height: 54px; margin: -27px 0 0 -27px; font-size: 16px; border-width: 10px; }
   .lk-combos-cabeza { max-width: 1200px; margin: 0 auto 30px; padding: 0 var(--lk-margen); }
   .lk-combos { grid-auto-columns: 300px; padding-inline: max(var(--lk-margen), calc((100vw - 1200px) / 2)); scroll-padding-left: max(var(--lk-margen), calc((100vw - 1200px) / 2)); }

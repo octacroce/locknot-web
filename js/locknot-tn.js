@@ -270,12 +270,18 @@
     });
   });
 
-  /* ---------- Armá el equipo (11/11) ----------
-     Fran (Vértice): "creativo pero es complicado entender cómo comprar diferentes tamaños y colores; poco intuitivo tener
-     que hacer click sobre el jugador para elegir el color y el talle". Ahora es una lista: una fila por color, con un
-     contador para chico y otro para grande. Desde 5 pares, 40% OFF en cada par. La cancha queda solo en la compu, como
-     dibujo que se pinta con lo elegido: no se toca. */
+  /* ---------- Armá el equipo (11/11, versión 2) ----------
+     Usuario, 11/11: "que puedan seleccionar cuántos son en el equipo y de ahí el desplegable para poder seleccionar. Y un
+     botón: si tenés dudas hablame al WhatsApp… podemos armar un carro nosotros y pasar el link".
+     1) ¿Cuántos son? (5, 7, 9, 11 u otro número con − n +; desde 5 va el 40% OFF).
+     2) Una fila por jugador con dos desplegables nativos: color y talle. Atajos: un color o un talle para todos, y mezclar.
+     3) WhatsApp con el equipo ya escrito, y "Copiar el link de este equipo": ?equipo=naranja-c2,azul-g3 abre el armador
+        completo (no agrega nada al carrito solo).
+     La cancha (solo compu) es un dibujo que se pinta con lo elegido. */
   var TALLES_EQUIPO = ["Chico", "Grande"];
+  var MAX_EQUIPO = 30;
+  var TAMANIOS = [5, 7, 9, 11];
+  var WHATSAPP = "5492215231153";                           // el de la tienda (botón flotante y Contacto, 11/11)
   var FORMACIONES = {
     5: [[50, 90], [24, 67], [76, 67], [34, 36], [66, 36]],
     7: [[50, 91], [20, 71], [50, 74], [80, 71], [28, 44], [72, 44], [50, 20]],
@@ -286,25 +292,61 @@
     var base = n <= 5 ? 5 : n <= 7 ? 7 : n <= 9 ? 9 : 11;
     return FORMACIONES[base].slice(0, Math.min(n, 11));
   }
-  var MAX_POR_FILA = 40;
+  /* Link del equipo: color + c/g + cantidad. Acepta también "negro" y "rojo" (como dice el panel de Tienda Nube). */
+  var ALIAS_COLOR = { negro: "negra", rojo: "roja" };
+  function leerLinkEquipo(texto) {
+    if (!texto) return null;
+    var lista = [];
+    String(texto).toLowerCase().split(/[,;\s]+/).forEach(function (pieza) {
+      var m = /^([a-z]+)-([cg])(\d{1,2})$/.exec(pieza);
+      if (!m) return;
+      var id = ALIAS_COLOR[m[1]] || m[1];
+      if (!color(id)) return;
+      var n = Math.min(Number(m[3]), MAX_EQUIPO);
+      for (var i = 0; i < n && lista.length < MAX_EQUIPO; i++) lista.push({ color: id, talle: m[2] === "c" ? "Chico" : "Grande" });
+    });
+    return lista.length >= MINIMO_EQUIPO ? lista : null;
+  }
 
-  document.querySelectorAll("[data-lk-pizarra]").forEach(function (caja) {
-    var cuenta = {};
-    COLORES.forEach(function (c) { cuenta[c.id + "|Chico"] = 1; cuenta[c.id + "|Grande"] = 0; }); // arranca con 7: uno de cada color
-    function cuantos(colorId, talle) { return cuenta[colorId + "|" + talle] || 0; }
-    function totalPares() { var s = 0; for (var k in cuenta) s += cuenta[k]; return s; }
-    function paresEquipo() {
-      var lista = [];
-      COLORES.forEach(function (c) {
-        TALLES_EQUIPO.forEach(function (tl) { for (var i = 0; i < cuantos(c.id, tl); i++) lista.push({ color: c.id, talle: tl }); });
+  document.querySelectorAll("[data-lk-pizarra]").forEach(function (caja, nCaja) {
+    var g = "eq" + nCaja;                                   // prefijo de ids, por si hay más de un armador
+    /* arranca con 7, uno de cada color, en chico */
+    var jugadores = COLORES.map(function (c) { return { color: c.id, talle: "Chico" }; });
+    var desdeLink = leerLinkEquipo(new URLSearchParams(location.search).get("equipo"));
+    if (desdeLink) jugadores = desdeLink;
+
+    function totalPares() { return jugadores.length; }
+    function paresEquipo() { return jugadores.slice(); }
+    function agrupado() {
+      var grupos = [];
+      jugadores.forEach(function (j) {
+        var gr = grupos.filter(function (x) { return x.color === j.color && x.talle === j.talle; })[0];
+        if (gr) gr.n++; else grupos.push({ color: j.color, talle: j.talle, n: 1 });
       });
-      return lista;
+      return grupos;
+    }
+    function resumenTexto() {
+      return agrupado().map(function (x) { return x.n + " " + color(x.color).nombre.toLowerCase() + " " + x.talle.toLowerCase(); }).join(", ");
+    }
+    function linkEquipo() {
+      var piezas = agrupado().map(function (x) { return x.color + "-" + (x.talle === "Chico" ? "c" : "g") + x.n; });
+      return location.origin + location.pathname + "?equipo=" + piezas.join(",") + "#equipo";
+    }
+    function opcionesColor(elegido, conVacio) {
+      return (conVacio ? '<option value="">' + conVacio + "</option>" : "") + COLORES.map(function (c) {
+        return '<option value="' + c.id + '"' + (c.id === elegido ? " selected" : "") + ">" + c.nombre + "</option>";
+      }).join("");
+    }
+    function opcionesTalle(elegido, conVacio) {
+      return (conVacio ? '<option value="">' + conVacio + "</option>" : "") + TALLES_EQUIPO.map(function (t) {
+        return '<option value="' + t + '"' + (t === elegido ? " selected" : "") + ">" + t + "</option>";
+      }).join("");
     }
 
     caja.innerHTML =
       '<div class="lk-cancha" aria-hidden="true">' +
-        '<svg viewBox="0 0 100 125" preserveAspectRatio="none"><defs><filter id="lk-tiza" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="0.7"/></filter></defs>' +
-          '<g fill="none" stroke="#fff" stroke-opacity=".72" stroke-width="2" vector-effect="non-scaling-stroke" filter="url(#lk-tiza)">' +
+        '<svg viewBox="0 0 100 125" preserveAspectRatio="none"><defs><filter id="lk-tiza-' + g + '" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="0.7"/></filter></defs>' +
+          '<g fill="none" stroke="#fff" stroke-opacity=".72" stroke-width="2" vector-effect="non-scaling-stroke" filter="url(#lk-tiza-' + g + ')">' +
             '<rect x="4" y="4" width="92" height="117" vector-effect="non-scaling-stroke"/>' +
             '<path d="M4 34H96" vector-effect="non-scaling-stroke"/><path d="M36 34a14 14 0 0 1 28 0" vector-effect="non-scaling-stroke"/>' +
             '<path d="M22 121V97H78V121" vector-effect="non-scaling-stroke"/><path d="M38 121V111H62V121" vector-effect="non-scaling-stroke"/><path d="M38 97a14 12 0 0 1 24 0" vector-effect="non-scaling-stroke"/>' +
@@ -313,75 +355,125 @@
         '<p class="lk-cancha-mas" data-mas-jugadores></p>' +
       "</div>" +
       '<div class="lk-armador">' +
-        '<p class="lk-armador-estado" data-estado aria-live="polite"></p>' +
-        '<div class="lk-armador-lista" role="group" aria-label="Pares por color y talle">' +
-          '<div class="lk-armador-cab" aria-hidden="true"><span>Color</span><span>Chico</span><span>Grande</span></div>' +
-          COLORES.map(function (c) {
-            return '<div class="lk-armador-fila"><span class="lk-armador-color"><i style="--c:' + c.hex + '"></i>' + c.nombre + "</span>" +
-              TALLES_EQUIPO.map(function (tl) {
-                var cual = c.nombre + " " + tl.toLowerCase();
-                return '<div class="lk-cont" data-color="' + c.id + '" data-talle="' + tl + '">' +
-                  '<button type="button" data-menos aria-label="Uno menos: ' + cual + '">−</button>' +
-                  '<output aria-label="Pares ' + cual + '">0</output>' +
-                  '<button type="button" data-mas aria-label="Uno más: ' + cual + '">+</button></div>';
-              }).join("") + "</div>";
-          }).join("") +
+        '<div class="lk-armador-paso">' +
+          '<p class="lk-armador-titulo"><span>1</span>¿Cuántos son en el equipo?</p>' +
+          '<div class="lk-cuantos">' +
+            '<div class="lk-cuantos-botones" role="group" aria-label="Cantidad de jugadores">' +
+              TAMANIOS.map(function (n) { return '<button type="button" data-tam="' + n + '" aria-pressed="false">' + n + "</button>"; }).join("") +
+            "</div>" +
+            '<div class="lk-cuantos-otro"><span>Otro número</span>' +
+            '<div class="lk-cont lk-cont-otro" role="group" aria-label="Otro número">' +
+              '<button type="button" data-menos aria-label="Un jugador menos">−</button>' +
+              '<output data-cantidad aria-live="polite"></output>' +
+              '<button type="button" data-mas aria-label="Un jugador más">+</button>' +
+            "</div></div>" +
+          "</div>" +
+          '<p class="lk-armador-estado" data-estado aria-live="polite"></p>' +
+        "</div>" +
+        '<div class="lk-armador-paso">' +
+          '<p class="lk-armador-titulo"><span>2</span>Color y talle de cada uno</p>' +
+          '<div class="lk-atajos">' +
+            '<label class="lk-select"><span class="lk-oculto">Un color para todos</span><select data-todos-color>' + opcionesColor("", "Mismo color") + "</select></label>" +
+            '<label class="lk-select"><span class="lk-oculto">Un talle para todos</span><select data-todos-talle>' + opcionesTalle("", "Mismo talle") + "</select></label>" +
+            '<button type="button" class="lk-atajo-mezclar" data-mezclar>Mezclar colores</button>' +
+          "</div>" +
+          '<p class="lk-armador-ayuda">Chico: hasta el número 30 · Grande: del 31 en adelante</p>' +
+          '<ol class="lk-armador-lista" data-filas></ol>' +
         "</div>" +
         '<div class="lk-resumen">' +
-          '<p class="lk-resumen-talles" data-talles></p>' +
+          '<p class="lk-chips" data-chips></p>' +
           '<div class="lk-equipo-total"><b data-total-equipo></b></div>' +
           '<p class="lk-resumen-detalle" data-detalle-equipo></p>' +
           '<a class="lk-btn lk-btn-ancho" href="#" data-equipo-comprar>Comprar el equipo</a>' +
           '<p class="lk-aviso" role="status" data-tn="omitir" data-equipo-aviso></p>' +
+          '<div class="lk-equipo-extra">' +
+            '<a class="lk-equipo-wa" data-equipo-wa target="_blank" rel="noopener">' +
+              '<svg class="lk-icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>' +
+              "<span>¿Dudas con el equipo? <b>Escribinos por WhatsApp</b></span></a>" +
+            '<button type="button" class="lk-equipo-link-btn" data-copiar-link>Copiar el link de este equipo</button>' +
+            '<p class="lk-equipo-link-ok" data-link-ok role="status"></p>' +
+            '<input class="lk-equipo-link-campo" data-link-campo type="text" readonly hidden aria-label="Link de este equipo">' +
+          "</div>" +
         "</div>" +
       "</div>";
 
     var capa = caja.querySelector(".lk-jugadores");
     function $(s) { return caja.querySelector(s); }
 
+    function pintarFilas() {
+      $("[data-filas]").innerHTML = jugadores.map(function (j, i) {
+        return '<li class="lk-jug-fila" data-i="' + i + '">' +
+          '<span class="lk-jug-num" style="--c:' + color(j.color).hex + '" aria-hidden="true">' + (i + 1) + "</span>" +
+          '<label class="lk-select"><span class="lk-oculto">Color del jugador ' + (i + 1) + '</span><select data-color>' + opcionesColor(j.color) + "</select></label>" +
+          '<label class="lk-select"><span class="lk-oculto">Talle del jugador ' + (i + 1) + '</span><select data-talle>' + opcionesTalle(j.talle) + "</select></label>" +
+          "</li>";
+      }).join("");
+    }
+
     function pintar() {
       var total = totalPares();
-      caja.querySelectorAll(".lk-cont").forEach(function (el) {
-        var n = cuantos(el.dataset.color, el.dataset.talle);
-        el.querySelector("output").textContent = n;
-        el.classList.toggle("lk-cont-con", n > 0);
-        el.querySelector("[data-menos]").disabled = n === 0;
-        el.querySelector("[data-mas]").disabled = n >= MAX_POR_FILA;
-      });
-      var falta = MINIMO_EQUIPO - total;
-      $("[data-estado]").innerHTML = total === 0 ? "Elegí al menos <b>" + MINIMO_EQUIPO + " pares</b>." :
-        falta > 0 ? "<b>" + total + (total === 1 ? " par" : " pares") + ".</b> Te " + (falta === 1 ? "falta 1" : "faltan " + falta) + " para el 40% OFF." :
-        "<b>" + total + " pares</b> a " + plata(PAR_EQUIPO) + " cada uno (40% OFF).";
-      var chicos = 0;
-      paresEquipo().forEach(function (pr) { if (pr.talle === "Chico") chicos++; });
-      var grandes = total - chicos;
-      $("[data-talles]").textContent = [chicos ? chicos + (chicos === 1 ? " chico" : " chicos") : "", grandes ? grandes + (grandes === 1 ? " grande" : " grandes") : ""].filter(Boolean).join(" y ");
-      var alcanza = total >= MINIMO_EQUIPO;
+      $("[data-cantidad]").textContent = total;
+      caja.querySelectorAll("[data-tam]").forEach(function (b) { b.setAttribute("aria-pressed", Number(b.dataset.tam) === total ? "true" : "false"); });
+      $(".lk-cont-otro [data-menos]").disabled = total <= MINIMO_EQUIPO;
+      $(".lk-cont-otro [data-mas]").disabled = total >= MAX_EQUIPO;
       var importe = PAR_EQUIPO * total;
-      $("[data-total-equipo]").textContent = alcanza ? plata(importe) : "";
-      $("[data-detalle-equipo]").textContent = alcanza ?
-        total + " pares a " + plata(PAR_EQUIPO) + " cada uno (40% OFF). Ahorrás " + plata(PRECIO_PAR * total - importe) +
-          ". Envío gratis y " + CUOTAS_EQUIPO + " cuotas sin interés de " + plata(Math.round(importe / CUOTAS_EQUIPO)) + "." :
-        "Con menos de " + MINIMO_EQUIPO + " pares, conviene el 2do par al 50%.";
-      var boton = $("[data-equipo-comprar]");
-      boton.textContent = alcanza ? "Comprar el equipo" : "Elegí al menos " + MINIMO_EQUIPO + " pares";
-      boton.setAttribute("aria-disabled", alcanza ? "false" : "true");
-      boton.classList.toggle("lk-btn-apagado", !alcanza);
-      /* la cancha (solo compu): un círculo por par, hasta 11 */
-      var lista = paresEquipo();
-      capa.innerHTML = puestos(lista.length).map(function (pos, i) {
-        return '<span class="lk-jugador" style="left:' + pos[0] + "%;top:" + pos[1] + "%;--c:" + color(lista[i].color).hex + '">' + (i + 1) + "</span>";
+      $("[data-estado]").innerHTML = "<b>" + total + " pares</b> a " + plata(PAR_EQUIPO) + " cada uno (40% OFF).";
+      $("[data-chips]").innerHTML = agrupado().map(function (x) {
+        return '<span class="lk-chip"><i style="--c:' + color(x.color).hex + '"></i>' + x.n + " " + color(x.color).nombre + " " + x.talle.toLowerCase() + "</span>";
       }).join("");
-      $("[data-mas-jugadores]").textContent = lista.length > 11 ? "+" + (lista.length - 11) + " pares más" : "";
+      $("[data-total-equipo]").textContent = plata(importe);
+      $("[data-detalle-equipo]").textContent = total + " pares a " + plata(PAR_EQUIPO) + " cada uno (40% OFF). Ahorrás " + plata(PRECIO_PAR * total - importe) +
+        ". Envío gratis y " + CUOTAS_EQUIPO + " cuotas sin interés de " + plata(Math.round(importe / CUOTAS_EQUIPO)) + ".";
+      $("[data-equipo-wa]").href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(
+        "Hola! Quiero armar un equipo de " + total + " pares de LOCKNOT: " + resumenTexto() + ". ¿Me ayudan? " + linkEquipo());
+      $("[data-link-ok]").textContent = "";
+      $("[data-link-campo]").hidden = true;
+      /* la cancha (solo compu): un círculo por jugador, hasta 11 */
+      capa.innerHTML = puestos(total).map(function (pos, i) {
+        return '<span class="lk-jugador" style="left:' + pos[0] + "%;top:" + pos[1] + "%;--c:" + color(jugadores[i].color).hex + '">' + (i + 1) + "</span>";
+      }).join("");
+      $("[data-mas-jugadores]").textContent = total > 11 ? "+" + (total - 11) + " pares más" : "";
+    }
+
+    /* Cambia la cantidad sin perder lo elegido: los nuevos siguen el color de todos (si es uno solo) o el próximo color */
+    function cambiarCantidad(n) {
+      n = Math.max(MINIMO_EQUIPO, Math.min(MAX_EQUIPO, n));
+      var mismos = jugadores.every(function (j) { return j.color === jugadores[0].color; });
+      while (jugadores.length < n) {
+        var ultimo = jugadores[jugadores.length - 1] || { color: COLORES[0].id, talle: "Chico" };
+        jugadores.push({ color: mismos ? ultimo.color : COLORES[jugadores.length % COLORES.length].id, talle: ultimo.talle });
+      }
+      jugadores.length = n;
+      pintarFilas();
+      pintar();
     }
 
     caja.addEventListener("click", function (ev) {
+      var tam = ev.target.closest("[data-tam]");
+      if (tam) { cambiarCantidad(Number(tam.dataset.tam)); return; }
       var mas = ev.target.closest("[data-mas]"), menos = ev.target.closest("[data-menos]");
-      if (mas || menos) {
-        var cont = (mas || menos).closest(".lk-cont");
-        var clave = cont.dataset.color + "|" + cont.dataset.talle;
-        cuenta[clave] = Math.max(0, Math.min(MAX_POR_FILA, (cuenta[clave] || 0) + (mas ? 1 : -1)));
+      if (mas || menos) { cambiarCantidad(totalPares() + (mas ? 1 : -1)); return; }
+      if (ev.target.closest("[data-mezclar]")) {
+        jugadores.forEach(function (j, i) { j.color = COLORES[i % COLORES.length].id; });
+        pintarFilas();
         pintar();
+        return;
+      }
+      if (ev.target.closest("[data-copiar-link]")) {
+        var link = linkEquipo();
+        var campo = $("[data-link-campo]");
+        var ok = $("[data-link-ok]");
+        /* el link se muestra siempre (por si el portapapeles no responde) y se avisa "copiado" solo si se copió */
+        campo.value = link;
+        campo.hidden = false;
+        ok.textContent = "Copiá este link y mandalo: abre este mismo equipo.";
+        campo.focus();
+        campo.select();
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(link).then(function () {
+            if (campo.value === link) ok.textContent = "Link copiado. Pegalo en WhatsApp: abre este mismo equipo.";
+          }, function () {});
+        }
         return;
       }
       if (ev.target.closest("[data-equipo-comprar]")) {
@@ -391,7 +483,42 @@
       }
     });
 
+    caja.addEventListener("change", function (ev) {
+      var s = ev.target;
+      if (s.matches("[data-todos-color]") && s.value) {
+        jugadores.forEach(function (j) { j.color = s.value; });
+        s.value = "";
+        pintarFilas();
+        pintar();
+        return;
+      }
+      if (s.matches("[data-todos-talle]") && s.value) {
+        jugadores.forEach(function (j) { j.talle = s.value; });
+        s.value = "";
+        pintarFilas();
+        pintar();
+        return;
+      }
+      var fila = s.closest("[data-i]");
+      if (!fila) return;
+      var j = jugadores[Number(fila.dataset.i)];
+      if (s.matches("[data-color]")) {
+        j.color = s.value;
+        fila.querySelector(".lk-jug-num").style.setProperty("--c", color(j.color).hex);
+      }
+      if (s.matches("[data-talle]")) j.talle = s.value;
+      pintar();
+    });
+
+    pintarFilas();
     pintar();
+    /* abierto desde un link de equipo: baja hasta el armador */
+    if (desdeLink && nCaja === 0) {
+      var bajar = function () { var sec = caja.closest("section") || caja; sec.scrollIntoView({ block: "start", behavior: "instant" }); };
+      var dosVeces = function () { setTimeout(bajar, 150); setTimeout(bajar, 900); };  // la segunda, por si algo cargó tarde
+      if (document.readyState === "complete") dosVeces();
+      else window.addEventListener("load", dosVeces);
+    }
   });
 
   /* ---------- Qué talle le va ---------- */
