@@ -68,15 +68,26 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 /* ---------- portada ---------- */
 .lk-hero { display: grid; background: var(--lk-verde); color: var(--lk-blanco); overflow: clip; }
 .lk-hero-foto { position: relative; }
-.lk-hero-foto img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: center top; } /* 7/11: el nene entero, con los botines y la banda abajo */
+.lk-hero-foto img { width: 100%; aspect-ratio: 1; object-fit: cover; object-position: center 30%; } /* 11/11 (Fran): más baja en el celu; se ven la cara y los botines con la banda */
 .lk-hero-foto::after { content: ""; position: absolute; inset: auto 0 0; height: 8%; background: linear-gradient(to bottom, rgba(11, 43, 33, 0), var(--lk-verde)); }
 /* 7/11: lupa con los botines de cerca, para que se vea la banda con el logo (el aro repite los del logo) */
 .lk-hero-zoom { position: absolute; right: 12px; top: 12px; z-index: 2; width: min(38%, 230px); display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 6px; }
 .lk-hero-foto .lk-hero-zoom img { position: static; inset: auto; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; object-position: center; border-radius: 50%; border: 4px solid var(--lk-naranja); box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .55); }
 .lk-hero-zoom figcaption { font: 900 12px/1.1 var(--lk-titulos); text-transform: uppercase; letter-spacing: .02em; text-align: center; padding: 6px 9px 4px; background: var(--lk-naranja); color: var(--lk-blanco); }
-.lk-hero-texto { position: relative; display: grid; gap: 18px; justify-items: start; padding: 4px var(--lk-margen) 44px; margin-top: 0; }
-.lk-hero-titulo { font: 900 clamp(84px, 25vw, 188px)/.86 var(--lk-titulos); letter-spacing: -.025em; text-transform: uppercase; padding-top: .12em; }
-.lk-hero-titulo em { display: block; font-style: normal; color: var(--lk-naranja); }
+.lk-hero-texto { position: relative; display: grid; gap: 12px; justify-items: stretch; padding: 4px var(--lk-margen) 28px; margin-top: 0; }
+.lk-hero-titulo { font: 900 clamp(50px, 15vw, 188px)/.9 var(--lk-titulos); letter-spacing: -.025em; text-transform: uppercase; padding-top: .12em; }
+.lk-hero-titulo em { display: inline; font-style: normal; color: var(--lk-naranja); }
+/* 11/11: la banda, el precio y la oferta, arriba de "Comprar" */
+.lk-hero-prod { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 12px; padding: 10px 12px; background: var(--lk-verde-2); }
+.lk-hero-prod img { width: 96px; }
+.lk-hero-prod p { font-size: 15px; line-height: 1.3; }
+.lk-hero-precio { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; margin-top: 4px; }
+.lk-hero-precio b { font: 900 26px/1 var(--lk-titulos); padding-top: .13em; }
+.lk-hero-precio span { padding: 3px 7px 1px; background: var(--lk-naranja); color: var(--lk-verde); font: 900 13px/1.1 var(--lk-titulos); text-transform: uppercase; }
+.lk-hero-comprar { width: 100%; }
+.lk-hero-equipo { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; font-size: 15px; line-height: 1.3; color: var(--lk-claro); text-decoration: none; }
+.lk-hero-equipo b { color: var(--lk-blanco); font-weight: 600; }
+.lk-hero-equipo .lk-icono { color: var(--lk-naranja); }
 .lk-hero-botones { display: flex; flex-wrap: wrap; gap: 10px; }
 
 /* ---------- franja que corre ---------- */
@@ -94,6 +105,9 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-precio { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
 .lk-precio b { font: 900 clamp(36px, 9vw, 46px)/1 var(--lk-titulos); padding-top: .13em; }
 .lk-precio span:not(.lk-conf) { font-size: 16px; }
+/* 11/11 (Fran): con 2 pares, el precio por par baja y el de lista queda tachado */
+.lk-precio-lista { font-size: 18px; color: var(--lk-claro); text-decoration-thickness: 2px; }
+.lk-precio .lk-precio-pack { flex-basis: 100%; font-size: 15px; font-weight: 600; color: var(--lk-naranja); }
 .lk-pills { display: flex; flex-wrap: wrap; gap: 6px; }
 .lk-pill { position: relative; display: flex; align-items: center; min-height: 44px; padding: 0 15px; border: 1px solid var(--lk-hilo); font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color .2s var(--lk-suave), color .2s var(--lk-suave), border-color .2s var(--lk-suave); }
 .lk-pill input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
@@ -135,30 +149,39 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-manifiesto .lk-aros { position: absolute; top: -30px; right: -46px; width: 170px; stroke: var(--lk-verde); opacity: .1; }
 .lk-manifiesto-texto { position: relative; display: grid; gap: 22px; max-width: 880px; }
 
-/* ---------- pizarra del equipo ---------- */
+/* ---------- armá el equipo (11/11) ----------
+   Fran: "poco intuitivo tener que hacer click sobre el jugador". Una fila por color con dos contadores (chico y grande).
+   La cancha es un dibujo que se pinta con lo elegido: solo en la compu, al costado. */
 .lk-equipo-cabeza { display: grid; gap: 12px; margin-bottom: 28px; }
 .lk-pizarra { display: grid; gap: 20px; }
-.lk-pizarra-izq { display: grid; gap: 10px; min-width: 0; }
-.lk-cantidades { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-.lk-cantidad { display: grid; justify-items: center; gap: 1px; min-height: 66px; padding: 9px 2px 7px; border: 1px solid var(--lk-hilo-claro); color: var(--lk-blanco); transition: background-color .2s var(--lk-suave), color .2s var(--lk-suave), border-color .2s var(--lk-suave); }
-.lk-cantidad b { font: 900 27px/1 var(--lk-titulos); padding-top: .13em; }
-.lk-cantidad small { font-size: 12px; color: var(--lk-claro); }
-.lk-cantidad:hover { border-color: var(--lk-blanco); }
-.lk-cantidad[aria-pressed="true"] { background: var(--lk-naranja); border-color: var(--lk-naranja); color: var(--lk-verde); }
-.lk-cantidad[aria-pressed="true"] small { color: var(--lk-verde); }
-.lk-cancha { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: repeating-linear-gradient(to bottom, #164A33 0 12.5%, #113D2A 12.5% 25%); }
+.lk-cancha { display: none; position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: repeating-linear-gradient(to bottom, #164A33 0 12.5%, #113D2A 12.5% 25%); }
 .lk-cancha svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .lk-jugadores { position: absolute; inset: 0; }
-.lk-jugador { position: absolute; display: grid; place-items: center; width: 46px; height: 46px; margin: -23px 0 0 -23px; padding-top: .14em; border-radius: 50%; border: 9px solid var(--c); background: var(--lk-verde); box-shadow: 0 0 0 2px rgba(255, 255, 255, .9); color: var(--lk-blanco); font: 900 14px/1 var(--lk-titulos); transition: transform .2s var(--lk-suave), box-shadow .2s var(--lk-suave), border-color .2s var(--lk-suave); }
-.lk-jugador:hover { transform: scale(1.08); }
-.lk-jugador[aria-pressed="true"] { z-index: 1; transform: scale(1.2); box-shadow: 0 0 0 3px var(--lk-blanco), 0 0 0 8px rgba(255, 255, 255, .28); }
-.lk-panel { display: grid; gap: 12px; min-width: 0; }
-.lk-panel-titulo { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; font-size: 18px; font-weight: 600; }
-.lk-panel-color { font-size: 15px; font-weight: 400; color: var(--lk-claro); }
-.lk-panel .lk-fichas { max-width: none; }
-.lk-panel-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.lk-accion { min-height: 44px; padding: 0 13px; border: 1px solid var(--lk-hilo-claro); font-size: 14px; font-weight: 500; transition: border-color .2s var(--lk-suave); }
-.lk-accion:hover { border-color: var(--lk-blanco); }
+.lk-jugador { position: absolute; display: grid; place-items: center; width: 46px; height: 46px; margin: -23px 0 0 -23px; padding-top: .14em; border-radius: 50%; border: 9px solid var(--c); background: var(--lk-verde); box-shadow: 0 0 0 2px rgba(255, 255, 255, .9); color: var(--lk-blanco); font: 900 14px/1 var(--lk-titulos); }
+.lk-cancha-mas { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-size: 14px; font-weight: 600; }
+.lk-armador { display: grid; gap: 14px; min-width: 0; }
+.lk-armador-estado { padding: 12px 14px; background: var(--lk-verde-2); font-size: 16px; line-height: 1.35; }
+.lk-armador-estado b { color: var(--lk-naranja); font-weight: 600; }
+.lk-armador-lista { display: grid; }
+.lk-armador-cab, .lk-armador-fila { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; }
+.lk-armador-cab { padding-bottom: 6px; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lk-claro); }
+.lk-armador-cab span:not(:first-child) { width: 128px; text-align: center; }
+.lk-armador-fila { padding: 6px 0; border-top: 1px solid var(--lk-hilo-claro); }
+.lk-armador-color { display: flex; align-items: center; gap: 9px; min-width: 0; font-size: 15px; font-weight: 500; }
+.lk-armador-color i { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px rgba(255, 255, 255, .55); }
+.lk-cont { display: grid; grid-template-columns: 44px 40px 44px; align-items: center; width: 128px; border: 1px solid var(--lk-hilo-claro); }
+.lk-cont button { display: grid; place-items: center; height: 44px; font: 600 22px/1 var(--lk-texto); color: var(--lk-blanco); transition: background-color .2s var(--lk-suave); }
+.lk-cont button:hover:not(:disabled) { background: var(--lk-verde-2); }
+.lk-cont button:disabled { opacity: .3; cursor: default; }
+.lk-cont output { text-align: center; font: 900 20px/1 var(--lk-titulos); padding-top: .15em; color: var(--lk-claro); }
+.lk-cont-con { border-color: var(--lk-naranja); }
+.lk-cont-con output { color: var(--lk-naranja); }
+@media (max-width: 359px) {
+  .lk-cont, .lk-armador-cab span:not(:first-child) { width: 112px; }
+  .lk-cont { grid-template-columns: 40px 32px 40px; }
+  .lk-cont button { height: 42px; }
+  .lk-armador-color { font-size: 14px; gap: 6px; }
+}
 .lk-resumen { display: grid; gap: 10px; margin-top: 4px; padding-top: 16px; border-top: 1px solid var(--lk-hilo-claro); }
 .lk-chips { display: flex; flex-wrap: wrap; gap: 5px 14px; font-size: 15px; }
 .lk-chip { display: inline-flex; align-items: center; gap: 6px; }
@@ -166,6 +189,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-resumen-talles, .lk-resumen-detalle { font-size: 15px; color: var(--lk-claro); }
 .lk-equipo-total { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
 .lk-equipo-total b { font: 900 clamp(38px, 10vw, 52px)/1 var(--lk-titulos); padding-top: .13em; }
+.lk-equipo-total b:empty { display: none; }
+.lk-btn-apagado, .lk-btn-apagado:hover { background: var(--lk-verde-2); color: var(--lk-claro); transform: none; cursor: default; }
 
 /* ---------- combinaciones ---------- */
 .lk-combos-sec { padding-bottom: var(--lk-seccion); }
@@ -184,10 +209,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-fotos::-webkit-scrollbar { display: none; }
 .lk-fotos img { width: 100%; aspect-ratio: 1; object-fit: cover; object-position: center 72%; scroll-snap-align: start; scroll-snap-stop: always; }
 .lk-fotos img.lk-foto-plana { object-fit: contain; object-position: center; padding: 12%; background: var(--lk-crema); }
+.lk-fotos img.lk-foto-info { object-position: center; } /* 11/11: las imágenes con datos (estilo Hears) son cuadradas y van enteras */
 .lk-contador { position: absolute; top: 12px; right: 12px; padding: 4px 10px; background: rgba(11, 43, 33, .72); font-size: 13px; font-weight: 600; }
 .lk-miniaturas { display: none; }
 .lk-compra { display: grid; gap: 20px; min-width: 0; padding: 20px var(--lk-margen) 40px; }
 .lk-compra-cabeza { display: grid; gap: 10px; }
+.lk-compra .lk-t1 { font-size: clamp(32px, 8.6vw, 76px); }
 .lk-eleccion { display: grid; gap: 8px; min-width: 0; }
 .lk-eleccion legend, .lk-eleccion-titulo { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; padding: 0; margin-bottom: 8px; font-size: 15px; font-weight: 600; }
 .lk-eleccion-titulo { margin-bottom: 0; }
@@ -240,6 +267,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .lk-minuto b { font: 900 16px/1 var(--lk-titulos); letter-spacing: .02em; text-transform: uppercase; padding-top: .3em; color: var(--lk-gris); }
 .lk-minuto p { font-size: clamp(22px, 6vw, 30px); font-weight: 500; line-height: 1.16; letter-spacing: -.01em; }
 .lk-minuto-final p { font-weight: 600; }
+.lk-partido-remate { margin-top: 30px; }
 
 /* ---------- cómo se pone ---------- */
 .lk-pasos-cabeza { display: grid; gap: 12px; margin-bottom: 36px; }
@@ -355,14 +383,18 @@ html.lk-cookies-espera .js-notification-cookie-private.notification-fixed-bottom
   .lk-hero-foto img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; object-position: 72% 25%; } /* 7/11: en la compu va la versión ancha (foto 21), con el nene entero */
   .lk-hero-zoom { left: 5%; right: auto; top: auto; bottom: 32px; width: 180px; }
   .lk-hero-foto::after { inset: 0 auto 0 0; width: 26%; height: auto; background: linear-gradient(to right, var(--lk-verde), rgba(11, 43, 33, 0)); }
-  .lk-hero-texto { align-content: center; gap: 24px; margin: 0; padding: 56px 0 56px var(--lk-margen); z-index: 1; }
+  .lk-hero-texto { align-content: center; justify-items: start; gap: 20px; margin: 0; padding: 56px 0 56px var(--lk-margen); z-index: 1; }
   .lk-hero-titulo { font-size: clamp(120px, 13.5vw, 196px); margin-right: -90px; }
+  .lk-hero-titulo em { display: block; }
+  .lk-hero-prod { width: min(100%, 460px); }
+  .lk-hero-comprar { width: auto; min-width: 260px; }
   .lk-banda { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: center; }
   .lk-asi { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 56px; align-items: start; }
   .lk-planas { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px 16px; }
   .lk-asi-datos { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .lk-asi-datos .lk-asi-cabeza { grid-column: 1 / -1; }
-  .lk-pizarra { grid-template-columns: minmax(0, 520px) minmax(0, 1fr); gap: 56px; align-items: start; }
+  .lk-pizarra { grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 56px; align-items: start; }
+  .lk-cancha { display: block; position: sticky; top: 92px; }
   .lk-jugador { width: 54px; height: 54px; margin: -27px 0 0 -27px; font-size: 16px; border-width: 10px; }
   .lk-combos-cabeza { max-width: 1200px; margin: 0 auto 30px; padding: 0 var(--lk-margen); }
   .lk-combos { grid-auto-columns: 300px; padding-inline: max(var(--lk-margen), calc((100vw - 1200px) / 2)); scroll-padding-left: max(var(--lk-margen), calc((100vw - 1200px) / 2)); }
@@ -376,6 +408,7 @@ html.lk-cookies-espera .js-notification-cookie-private.notification-fixed-bottom
   .lk-miniaturas img.lk-foto-plana { object-fit: contain; object-position: center; padding: 8%; background: var(--lk-crema); }
   .lk-compra { padding: 4px 0 0; }
   .lk-compra .lk-t1 { font-size: clamp(44px, 4.3vw, 60px); }
+  .lk-miniaturas img.lk-foto-info { object-position: center; }
   .lk-video { margin-top: 0; }
   .lk-partido { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 72px; align-items: start; }
   .lk-partido-cabeza { position: sticky; top: 104px; }
@@ -413,7 +446,7 @@ html.lk-cookies-espera .js-notification-cookie-private.notification-fixed-bottom
   .lk-atan-sec .lk-atan { max-width: calc(1200px + 2 * var(--lk-margen)); margin: 0 auto; padding: 0 var(--lk-margen); }
   .lk-atan.lk-atan-en-sec { max-width: 1200px; margin: 64px auto 0; padding: 0; }
   .lk-atan .lk-combo figcaption { font-size: 14px; }
-  .lk-miniaturas { grid-template-columns: repeat(7, minmax(0, 92px)); } /* 9/11: 7 fotos (sumó la de hockey) */
+  .lk-miniaturas { grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; } /* 11/11: 9 fotos (las 4 con datos) */
   .lk-miniaturas img.lk-foto-arriba { object-position: center 30%; }
   .lk-cierre-abajo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 720px; }
   .lk-cierre-abajo img { position: absolute; inset: 0 0 0 auto; width: 50%; height: 100%; aspect-ratio: auto; }

@@ -25,7 +25,7 @@
   if (precioFicha && precioFicha > PRECIO_PAR / 3 && precioFicha < PRECIO_PAR * 3) PRECIO_PAR = precioFicha;
   var PACKS = { 1: PRECIO_PAR, 2: Math.round(PRECIO_PAR * 2 * 0.75) };   // 2 pares: 25% OFF en Tienda Nube (2do al 50%)
   var PAR_EQUIPO = Math.round(PRECIO_PAR * 0.6);                        // equipo: 40% OFF en Tienda Nube
-  var EQUIPO = { 5: PAR_EQUIPO, 7: PAR_EQUIPO, 9: PAR_EQUIPO, 11: PAR_EQUIPO };
+  var MINIMO_EQUIPO = 5;                                    // el 40% OFF va desde 5 pares
   var CUOTAS_EQUIPO = 3;
 
   /* Los de la lista de la proveedora que van con logo blanco. El naranja es a pedido: mínimo 200 pares por color, falta confirmarlo. */
@@ -153,6 +153,15 @@
     document.querySelectorAll("[data-lk-total]").forEach(function (el) { el.textContent = plata(importe); });
     var detalle = pedido.cantidad === 1 ? "1 par" : "2 pares: el segundo, al 50%";
     document.querySelectorAll("[data-lk-detalle]").forEach(function (el) { el.textContent = detalle; });
+    /* 11/11 (Fran, Vértice: "cuando elijo el descuento progresivo, el número por par de arriba no se modifica"):
+       con 2 pares, arriba dice $26.175 el par, con $34.900 tachado y "2 pares $52.350" */
+    var conDescuento = importe < lista;
+    document.querySelectorAll("[data-lk-par]").forEach(function (el) { el.textContent = plata(Math.round(importe / pedido.cantidad)); });
+    document.querySelectorAll("[data-lk-lista]").forEach(function (el) { el.textContent = plata(PRECIO_PAR); el.hidden = !conDescuento; });
+    document.querySelectorAll("[data-lk-pack-texto]").forEach(function (el) {
+      el.textContent = conDescuento ? pedido.cantidad + " pares " + plata(importe) : "";
+      el.hidden = !conDescuento;
+    });
     var ahorro = document.querySelector("[data-lk-ahorro]");
     if (ahorro) {
       ahorro.textContent = lista > importe ? "Ahorrás " + plata(lista - importe) + " y el envío es gratis" : "";
@@ -261,47 +270,68 @@
     });
   });
 
-  /* ---------- Pizarra: armá el equipo ---------- */
+  /* ---------- Armá el equipo (11/11) ----------
+     Fran (Vértice): "creativo pero es complicado entender cómo comprar diferentes tamaños y colores; poco intuitivo tener
+     que hacer click sobre el jugador para elegir el color y el talle". Ahora es una lista: una fila por color, con un
+     contador para chico y otro para grande. Desde 5 pares, 40% OFF en cada par. La cancha queda solo en la compu, como
+     dibujo que se pinta con lo elegido: no se toca. */
+  var TALLES_EQUIPO = ["Chico", "Grande"];
   var FORMACIONES = {
     5: [[50, 90], [24, 67], [76, 67], [34, 36], [66, 36]],
     7: [[50, 91], [20, 71], [50, 74], [80, 71], [28, 44], [72, 44], [50, 20]],
     9: [[50, 92], [18, 74], [50, 77], [82, 74], [18, 50], [50, 53], [82, 50], [34, 25], [66, 25]],
     11: [[50, 93], [13, 75], [37, 79], [63, 79], [87, 75], [18, 51], [50, 54], [82, 51], [18, 25], [50, 21], [82, 25]]
   };
+  function puestos(n) {
+    var base = n <= 5 ? 5 : n <= 7 ? 7 : n <= 9 ? 9 : 11;
+    return FORMACIONES[base].slice(0, Math.min(n, 11));
+  }
+  var MAX_POR_FILA = 40;
+
   document.querySelectorAll("[data-lk-pizarra]").forEach(function (caja) {
-    var cantidad = 7, activo = 0;
-    var equipo = [];
-    for (var i = 0; i < 11; i++) equipo.push({ color: COLORES[i % COLORES.length].id, talle: "Chico" });
+    var cuenta = {};
+    COLORES.forEach(function (c) { cuenta[c.id + "|Chico"] = 1; cuenta[c.id + "|Grande"] = 0; }); // arranca con 7: uno de cada color
+    function cuantos(colorId, talle) { return cuenta[colorId + "|" + talle] || 0; }
+    function totalPares() { var s = 0; for (var k in cuenta) s += cuenta[k]; return s; }
+    function paresEquipo() {
+      var lista = [];
+      COLORES.forEach(function (c) {
+        TALLES_EQUIPO.forEach(function (tl) { for (var i = 0; i < cuantos(c.id, tl); i++) lista.push({ color: c.id, talle: tl }); });
+      });
+      return lista;
+    }
 
     caja.innerHTML =
-      '<div class="lk-pizarra-izq">' +
-        '<div class="lk-cantidades" role="group" aria-label="Cuántos jugadores">' +
-          Object.keys(EQUIPO).map(function (n) {
-            return '<button type="button" class="lk-cantidad" data-n="' + n + '"><b>' + n + "</b><small>" + plata(EQUIPO[n]) + " c/u</small></button>";
+      '<div class="lk-cancha" aria-hidden="true">' +
+        '<svg viewBox="0 0 100 125" preserveAspectRatio="none"><defs><filter id="lk-tiza" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="0.7"/></filter></defs>' +
+          '<g fill="none" stroke="#fff" stroke-opacity=".72" stroke-width="2" vector-effect="non-scaling-stroke" filter="url(#lk-tiza)">' +
+            '<rect x="4" y="4" width="92" height="117" vector-effect="non-scaling-stroke"/>' +
+            '<path d="M4 34H96" vector-effect="non-scaling-stroke"/><path d="M36 34a14 14 0 0 1 28 0" vector-effect="non-scaling-stroke"/>' +
+            '<path d="M22 121V97H78V121" vector-effect="non-scaling-stroke"/><path d="M38 121V111H62V121" vector-effect="non-scaling-stroke"/><path d="M38 97a14 12 0 0 1 24 0" vector-effect="non-scaling-stroke"/>' +
+          "</g></svg>" +
+        '<div class="lk-jugadores"></div>' +
+        '<p class="lk-cancha-mas" data-mas-jugadores></p>' +
+      "</div>" +
+      '<div class="lk-armador">' +
+        '<p class="lk-armador-estado" data-estado aria-live="polite"></p>' +
+        '<div class="lk-armador-lista" role="group" aria-label="Pares por color y talle">' +
+          '<div class="lk-armador-cab" aria-hidden="true"><span>Color</span><span>Chico</span><span>Grande</span></div>' +
+          COLORES.map(function (c) {
+            return '<div class="lk-armador-fila"><span class="lk-armador-color"><i style="--c:' + c.hex + '"></i>' + c.nombre + "</span>" +
+              TALLES_EQUIPO.map(function (tl) {
+                var cual = c.nombre + " " + tl.toLowerCase();
+                return '<div class="lk-cont" data-color="' + c.id + '" data-talle="' + tl + '">' +
+                  '<button type="button" data-menos aria-label="Uno menos: ' + cual + '">−</button>' +
+                  '<output aria-label="Pares ' + cual + '">0</output>' +
+                  '<button type="button" data-mas aria-label="Uno más: ' + cual + '">+</button></div>';
+              }).join("") + "</div>";
           }).join("") +
         "</div>" +
-        '<div class="lk-cancha">' +
-          '<svg viewBox="0 0 100 125" preserveAspectRatio="none" aria-hidden="true"><defs><filter id="lk-tiza" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="0.7"/></filter></defs>' +
-            '<g fill="none" stroke="#fff" stroke-opacity=".72" stroke-width="2" vector-effect="non-scaling-stroke" filter="url(#lk-tiza)">' +
-              '<rect x="4" y="4" width="92" height="117" vector-effect="non-scaling-stroke"/>' +
-              '<path d="M4 34H96" vector-effect="non-scaling-stroke"/><path d="M36 34a14 14 0 0 1 28 0" vector-effect="non-scaling-stroke"/>' +
-              '<path d="M22 121V97H78V121" vector-effect="non-scaling-stroke"/><path d="M38 121V111H62V121" vector-effect="non-scaling-stroke"/><path d="M38 97a14 12 0 0 1 24 0" vector-effect="non-scaling-stroke"/>' +
-            "</g></svg>" +
-          '<div class="lk-jugadores"></div>' +
-        "</div>" +
-      "</div>" +
-      '<div class="lk-panel">' +
-        '<p class="lk-panel-titulo"><span data-jugador></span><span class="lk-panel-color" data-jugador-color></span></p>' +
-        '<div class="lk-fichas" data-colores></div>' +
-        '<div class="lk-panel-fila"><div class="lk-seg" role="group" aria-label="Talle del jugador" data-talle></div>' +
-          '<button type="button" class="lk-accion" data-todos>Este color a todos</button>' +
-          '<button type="button" class="lk-accion" data-mezclar>Mezclar colores</button></div>' +
         '<div class="lk-resumen">' +
-          '<div class="lk-chips" data-chips></div>' +
           '<p class="lk-resumen-talles" data-talles></p>' +
           '<div class="lk-equipo-total"><b data-total-equipo></b></div>' +
           '<p class="lk-resumen-detalle" data-detalle-equipo></p>' +
-          '<a class="lk-btn lk-btn-ancho" href="#" data-equipo-comprar>Quiero este equipo</a>' +
+          '<a class="lk-btn lk-btn-ancho" href="#" data-equipo-comprar>Comprar el equipo</a>' +
           '<p class="lk-aviso" role="status" data-tn="omitir" data-equipo-aviso></p>' +
         "</div>" +
       "</div>";
@@ -309,90 +339,59 @@
     var capa = caja.querySelector(".lk-jugadores");
     function $(s) { return caja.querySelector(s); }
 
-    function pintarPanel() {
-      var j = equipo[activo];
-      $("[data-jugador]").textContent = "Jugador " + (activo + 1) + (activo === 0 ? " (arquero)" : "");
-      $("[data-jugador-color]").textContent = color(j.color).nombre + ", talle " + j.talle.toLowerCase();
-      $("[data-colores]").innerHTML = fichas("equipo-color", j.color);
-      $("[data-talle]").innerHTML = talles("equipo-talle", j.talle);
-    }
-
-    function pintarResumen() {
-      var usados = equipo.slice(0, cantidad);
-      var cuenta = {}, chicos = 0;
-      usados.forEach(function (j) { cuenta[j.color] = (cuenta[j.color] || 0) + 1; if (j.talle === "Chico") chicos++; });
-      $("[data-chips]").innerHTML = COLORES.filter(function (c) { return cuenta[c.id]; }).map(function (c) {
-        return '<span class="lk-chip" style="--c:' + c.hex + '"><i></i>' + cuenta[c.id] + " " + c.nombre + "</span>";
-      }).join("");
-      var grandes = cantidad - chicos;
+    function pintar() {
+      var total = totalPares();
+      caja.querySelectorAll(".lk-cont").forEach(function (el) {
+        var n = cuantos(el.dataset.color, el.dataset.talle);
+        el.querySelector("output").textContent = n;
+        el.classList.toggle("lk-cont-con", n > 0);
+        el.querySelector("[data-menos]").disabled = n === 0;
+        el.querySelector("[data-mas]").disabled = n >= MAX_POR_FILA;
+      });
+      var falta = MINIMO_EQUIPO - total;
+      $("[data-estado]").innerHTML = total === 0 ? "Elegí al menos <b>" + MINIMO_EQUIPO + " pares</b>." :
+        falta > 0 ? "<b>" + total + (total === 1 ? " par" : " pares") + ".</b> Te " + (falta === 1 ? "falta 1" : "faltan " + falta) + " para el 40% OFF." :
+        "<b>" + total + " pares</b> a " + plata(PAR_EQUIPO) + " cada uno (40% OFF).";
+      var chicos = 0;
+      paresEquipo().forEach(function (pr) { if (pr.talle === "Chico") chicos++; });
+      var grandes = total - chicos;
       $("[data-talles]").textContent = [chicos ? chicos + (chicos === 1 ? " chico" : " chicos") : "", grandes ? grandes + (grandes === 1 ? " grande" : " grandes") : ""].filter(Boolean).join(" y ");
-      var importe = EQUIPO[cantidad] * cantidad;
-      $("[data-total-equipo]").textContent = plata(importe);
-      $("[data-detalle-equipo]").textContent = cantidad + " pares a " + plata(EQUIPO[cantidad]) + " cada uno (40% OFF). Ahorrás " + plata(PRECIO_PAR * cantidad - importe) +
-        ". Envío gratis y " + CUOTAS_EQUIPO + " cuotas sin interés de " + plata(Math.round(importe / CUOTAS_EQUIPO)) + ".";
+      var alcanza = total >= MINIMO_EQUIPO;
+      var importe = PAR_EQUIPO * total;
+      $("[data-total-equipo]").textContent = alcanza ? plata(importe) : "";
+      $("[data-detalle-equipo]").textContent = alcanza ?
+        total + " pares a " + plata(PAR_EQUIPO) + " cada uno (40% OFF). Ahorrás " + plata(PRECIO_PAR * total - importe) +
+          ". Envío gratis y " + CUOTAS_EQUIPO + " cuotas sin interés de " + plata(Math.round(importe / CUOTAS_EQUIPO)) + "." :
+        "Con menos de " + MINIMO_EQUIPO + " pares, conviene el 2do par al 50%.";
+      var boton = $("[data-equipo-comprar]");
+      boton.textContent = alcanza ? "Comprar el equipo" : "Elegí al menos " + MINIMO_EQUIPO + " pares";
+      boton.setAttribute("aria-disabled", alcanza ? "false" : "true");
+      boton.classList.toggle("lk-btn-apagado", !alcanza);
+      /* la cancha (solo compu): un círculo por par, hasta 11 */
+      var lista = paresEquipo();
+      capa.innerHTML = puestos(lista.length).map(function (pos, i) {
+        return '<span class="lk-jugador" style="left:' + pos[0] + "%;top:" + pos[1] + "%;--c:" + color(lista[i].color).hex + '">' + (i + 1) + "</span>";
+      }).join("");
+      $("[data-mas-jugadores]").textContent = lista.length > 11 ? "+" + (lista.length - 11) + " pares más" : "";
     }
-
-    function pintarJugadores() {
-      var puestos = FORMACIONES[cantidad];
-      var html = "";
-      puestos.forEach(function (p, i) {
-        html += '<button type="button" class="lk-jugador" data-j="' + i + '" style="left:' + p[0] + "%;top:" + p[1] + "%;--c:" + color(equipo[i].color).hex + '" aria-pressed="' + (i === activo) + '" aria-label="Jugador ' + (i + 1) + ", " + color(equipo[i].color).nombre + ", talle " + equipo[i].talle.toLowerCase() + '">' + (i + 1) + "</button>";
-      });
-      capa.innerHTML = html;
-    }
-
-    function pintarCantidades() {
-      caja.querySelectorAll(".lk-cantidad").forEach(function (b) {
-        b.setAttribute("aria-pressed", Number(b.dataset.n) === cantidad ? "true" : "false");
-      });
-    }
-
-    function pintarTodo() { pintarCantidades(); pintarJugadores(); pintarPanel(); pintarResumen(); }
 
     caja.addEventListener("click", function (ev) {
-      var cant = ev.target.closest(".lk-cantidad");
-      if (cant) {
-        cantidad = Number(cant.dataset.n);
-        if (activo >= cantidad) activo = 0;
-        pintarTodo();
-        return;
-      }
-      var jug = ev.target.closest(".lk-jugador");
-      if (jug) {
-        activo = Number(jug.dataset.j);
-        pintarJugadores();
-        pintarPanel();
-        capa.querySelector('[data-j="' + activo + '"]').focus({ preventScroll: true });
-        return;
-      }
-      if (ev.target.closest("[data-todos]")) {
-        for (var i = 0; i < 11; i++) equipo[i].color = equipo[activo].color;
-        pintarJugadores(); pintarResumen();
-        return;
-      }
-      if (ev.target.closest("[data-mezclar]")) {
-        var inicio = Math.floor(Math.random() * COLORES.length);
-        for (var k = 0; k < 11; k++) equipo[k].color = COLORES[(inicio + k) % COLORES.length].id;
-        pintarJugadores(); pintarPanel(); pintarResumen();
+      var mas = ev.target.closest("[data-mas]"), menos = ev.target.closest("[data-menos]");
+      if (mas || menos) {
+        var cont = (mas || menos).closest(".lk-cont");
+        var clave = cont.dataset.color + "|" + cont.dataset.talle;
+        cuenta[clave] = Math.max(0, Math.min(MAX_POR_FILA, (cuenta[clave] || 0) + (mas ? 1 : -1)));
+        pintar();
         return;
       }
       if (ev.target.closest("[data-equipo-comprar]")) {
         ev.preventDefault();
-        comprar(equipo.slice(0, cantidad), ev.target.closest("[data-equipo-comprar]"));
+        if (totalPares() < MINIMO_EQUIPO) return;
+        comprar(paresEquipo(), ev.target.closest("[data-equipo-comprar]"));
       }
     });
 
-    caja.addEventListener("change", function (ev) {
-      if (ev.target.name === "equipo-color") equipo[activo].color = ev.target.value;
-      if (ev.target.name === "equipo-talle") equipo[activo].talle = ev.target.value;
-      var boton = capa.querySelector('[data-j="' + activo + '"]');
-      boton.style.setProperty("--c", color(equipo[activo].color).hex);
-      boton.setAttribute("aria-label", "Jugador " + (activo + 1) + ", " + color(equipo[activo].color).nombre + ", talle " + equipo[activo].talle.toLowerCase());
-      $("[data-jugador-color]").textContent = color(equipo[activo].color).nombre + ", talle " + equipo[activo].talle.toLowerCase();
-      pintarResumen();
-    });
-
-    pintarTodo();
+    pintar();
   });
 
   /* ---------- Qué talle le va ---------- */
