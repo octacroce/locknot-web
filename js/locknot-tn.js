@@ -614,4 +614,17 @@
   window.addEventListener("scroll", function () { if (!rafCookies) rafCookies = window.requestAnimationFrame(chequearCookies); }, { passive: true });
   window.addEventListener("resize", chequearCookies);
   chequearCookies();
+  /* ---------- Botón de WhatsApp del tema (12/11): en el celu tapaba la tarjeta "2 pares". Se esconde mientras el
+     cuadro de compra está en pantalla y vuelve cuando la persona baja (la regla está en locknot.css) ---------- */
+  var cuadroCompra = document.querySelector(".lk-compra"), rafWa = null;
+  if (cuadroCompra) {
+    var chequearWa = function () {
+      rafWa = null;
+      var r = cuadroCompra.getBoundingClientRect();
+      document.documentElement.classList.toggle("lk-wa-espera", r.top < window.innerHeight && r.bottom > 0);
+    };
+    window.addEventListener("scroll", function () { if (!rafWa) rafWa = window.requestAnimationFrame(chequearWa); }, { passive: true });
+    window.addEventListener("resize", chequearWa);
+    chequearWa();
+  }
 })();

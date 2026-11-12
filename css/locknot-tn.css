@@ -384,8 +384,14 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
   font: 600 13px/1.3 var(--lk-texto) !important; color: var(--lk-naranja) !important; text-decoration: underline !important; }
 body:has(.lk-fija.lk-ver) .js-notification-cookie-private.notification-fixed-bottom { bottom: 96px !important; }
 /* botón flotante de WhatsApp de Tienda Nube: sube cuando aparece la barra de compra, así no tapa "Lo quiero" (como en Axily) */
-.btn-whatsapp { transition: bottom .4s var(--lk-suave); }
+.btn-whatsapp { transition: bottom .4s var(--lk-suave), opacity .3s var(--lk-suave), visibility .3s; }
 body:has(.lk-fija.lk-ver) .btn-whatsapp { bottom: 96px !important; }
+/* 12/11 (usuario: "sí, hacelo"): en el celu el botón de WhatsApp tapaba la tarjeta "2 pares" del cuadro de compra.
+   Se esconde mientras ese cuadro (packs, color y talle, Comprar) está en pantalla y vuelve al bajar
+   (locknot.js pone la clase lk-wa-espera). En la compu no hace falta: no tapa nada */
+@media (max-width: 767px) {
+  html.lk-wa-espera .btn-whatsapp { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+}
 html.lk-cookies-espera .js-notification-cookie-private.notification-fixed-bottom { opacity: 0 !important; visibility: hidden !important; }
 
 /* ---------- aparece al llegar ---------- */
